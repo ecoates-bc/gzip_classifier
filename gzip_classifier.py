@@ -71,8 +71,8 @@ def main():
     ag_news_data = load_dataset("ag_news")
     train_ds_raw, test_ds_raw = ag_news_data["train"], ag_news_data["test"]
 
-    N_TRAINING_EXAMPLES = 100
-    N_TEST_EXAMPLES = 1000
+    N_TRAINING_EXAMPLES = 2500
+    N_TEST_EXAMPLES = 500
 
     train_ds = train_ds_raw.map(create_bytestring, with_indices=True).shuffle(seed=42)
     test_ds = test_ds_raw.map(create_bytestring, with_indices=True).shuffle(seed=42)
