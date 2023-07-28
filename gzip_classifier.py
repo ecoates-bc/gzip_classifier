@@ -9,7 +9,6 @@ from multiprocessing import Pool
 def create_bytestring(example, i):
     to_bytes = bytes(example["text"], "utf-8")
     example["bytes"] = to_bytes
-    example["length"] = len(gzip.compress(to_bytes))
     return example
 
 
@@ -72,7 +71,7 @@ def main():
     ag_news_data = load_dataset("ag_news")
     train_ds_raw, test_ds_raw = ag_news_data["train"], ag_news_data["test"]
 
-    N_TRAINING_EXAMPLES = 2500
+    N_TRAINING_EXAMPLES = 100
     N_TEST_EXAMPLES = 1000
 
     train_ds = train_ds_raw.map(create_bytestring, with_indices=True).shuffle(seed=42)
