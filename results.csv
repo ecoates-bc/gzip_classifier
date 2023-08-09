@@ -1,0 +1,5 @@
+examples,method,time
+2500, parallel pool, 1m33s
+2500, numba jit, 1m23s
+5000, numba jit, 5m34s
+5000, parallel pool, 6m4s

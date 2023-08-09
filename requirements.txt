@@ -2,3 +2,4 @@ datasets
 numpy
 scikit-learn
 tqdm
+cppimport

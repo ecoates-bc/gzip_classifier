@@ -4,6 +4,8 @@ import gzip
 from sklearn.neighbors import KNeighborsClassifier
 from tqdm import tqdm
 from multiprocessing import Pool
+import ncd
+from numba import jit
 
 
 def create_bytestring(example, i):
@@ -12,7 +14,7 @@ def create_bytestring(example, i):
     return example
 
 
-def compute_ncd(a, b):
+def compute_ncd_python(a, b):
     """Compute the normalized compression distance. a and b are byte strings.
     """
     c_ab = len(gzip.compress(a + b))
@@ -21,9 +23,17 @@ def compute_ncd(a, b):
     return (c_ab - min(c_a, c_b)) / max(c_a, c_b)
 
 
+def compute_ncd(a, b):
+    return ncd.compute_ncd(a, b)
+
+
+def update_matrix(x, i, j, result):
+    x[i, j] = result
+
+
 def compute_and_return_ncd(starmap_args):
     a, b, i, j = starmap_args
-    ncd = compute_ncd(a, b)
+    ncd = compute_ncd_python(a, b)
     return i, j, ncd
 
 
@@ -41,7 +51,7 @@ def precompute_X(bytestrings, n):
         
         for result in pool.imap(compute_and_return_ncd, starmap_args, chunksize=250):
             i, j, ncd = result
-            X[i,j] = ncd
+            update_matrix(X, i, j, ncd)
             progress.update(1)
     
     return X
@@ -61,7 +71,7 @@ def precompute_X_test(bytestrings, bytestrings_test, n, n_test):
 
         for result in pool.imap(compute_and_return_ncd, starmap_args, chunksize=250):
             i, j, ncd = result
-            X_test[i,j] = ncd
+            update_matrix(X_test, i, j, ncd)
             progress.update(1)
 
     return X_test
@@ -71,7 +81,7 @@ def main():
     ag_news_data = load_dataset("ag_news")
     train_ds_raw, test_ds_raw = ag_news_data["train"], ag_news_data["test"]
 
-    N_TRAINING_EXAMPLES = 2500
+    N_TRAINING_EXAMPLES = 5000
     N_TEST_EXAMPLES = 500
 
     train_ds = train_ds_raw.map(create_bytestring, with_indices=True).shuffle(seed=42)
